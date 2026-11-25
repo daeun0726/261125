@@ -6,6 +6,7 @@ import { similarToReport } from "@/lib/similar";
 import ReportSheet, { sheetText, type SheetData } from "@/components/ReportSheet";
 import CopyButton from "@/components/CopyButton";
 import { SetupNotice } from "@/components/ui";
+import Train3D from "@/components/Train3D";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,9 @@ export default async function ReportDetail({ params }: PageProps<"/reports/[id]"
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Link href="/reports" className="link text-sm">← 보고서 목록</Link>
           <div className="ml-auto"><CopyButton text={sheetText(d)} /></div>
+        </div>
+        <div className="mb-4">
+          <Train3D vehicleType={r.vehicles?.vehicle_type} highlight={r.device} height={300} label={`${r.vehicles?.car_no ?? ""} ${r.vehicles?.vehicle_type ?? ""} · 고장 부위 표시`} />
         </div>
         <ReportSheet d={d} />
       </div>

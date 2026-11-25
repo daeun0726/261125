@@ -16,6 +16,7 @@ export async function POST(req: Request) {
       id: m.report.id,
       report_no: m.report.report_no,
       title: m.report.title,
+      device: m.report.device,
       symptom: m.report.symptom,
       cause: m.report.cause,
       action: m.report.action,

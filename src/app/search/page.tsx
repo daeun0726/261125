@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import Train3D from "@/components/Train3D";
 
-type M = { id: number; report_no: string; title: string; symptom: string; cause: string; action: string; car_no?: string; vehicle_type?: string; dept?: string; occurred_at: string; score: number; reason: string };
+type M = { id: number; report_no: string; title: string; device: string; symptom: string; cause: string; action: string; car_no?: string; vehicle_type?: string; dept?: string; occurred_at: string; score: number; reason: string };
 type Res = { mode: "ai" | "keyword"; note?: string; checklist: string[]; matches: M[] };
 
 const EXAMPLES = [
@@ -66,6 +67,9 @@ export default function SearchPage() {
             <span className={`chip ${res.mode === "ai" ? "bg-blue-100 text-[#0b3d91]" : ""}`}>{res.mode === "ai" ? "AI 추천" : "키워드 추천"}</span>
             {res.note && <span className="text-slate-500">{res.note}</span>}
           </div>
+          {res.matches[0] && (
+            <Train3D vehicleType={res.matches[0].vehicle_type} highlight={res.matches[0].device} height={280} label={`추천 1순위 ${res.matches[0].report_no} · 예상 고장 부위`} />
+          )}
           {res.matches.length ? (
             <div className="grid gap-3 md:grid-cols-3">
               {res.matches.map((m) => (

@@ -5,6 +5,7 @@ import { hasAI } from "@/lib/gemini";
 import { BarCount, MonthLine } from "@/components/Charts";
 import { PageTitle, ReportTable, SetupNotice, Stat } from "@/components/ui";
 import EmbedButton from "@/components/EmbedButton";
+import FleetHeatmap from "@/components/FleetHeatmap";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,15 @@ export default async function Dashboard() {
   });
   const repeats = [...repeatMap.values()].filter((x) => x.count > 1).sort((a, b) => b.count - a.count).slice(0, 5);
 
+  // per vehicle type, per device counts for the 3D heatmap
+  const heat: Record<string, Record<string, number>> = {};
+  reports.forEach((r) => {
+    const vt = r.vehicles?.vehicle_type;
+    if (!vt) return;
+    heat[vt] = heat[vt] || {};
+    heat[vt][r.device] = (heat[vt][r.device] || 0) + 1;
+  });
+
   // monthly trend over the last 24 months
   const months: { month: string; count: number }[] = [];
   const end = new Date(latest + "T00:00:00Z");
@@ -61,6 +71,8 @@ export default async function Dashboard() {
         <Stat label="평균 작업 시간" value={`${avgHours.toFixed(1)}시간`} sub="보고서 1건당" />
         <Stat label="반복 고장 (같은 차량·같은 증상)" value={`${repeats.length}건`} sub="2회 이상 발생" />
       </div>
+
+      <FleetHeatmap counts={heat} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="card">
