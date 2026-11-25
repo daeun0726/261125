@@ -34,7 +34,7 @@ export default function FleetHeatmap({ counts }: { counts: Record<string, Record
               </li>
             )) : <li className="text-slate-500">보고서가 없습니다.</li>}
           </ol>
-          <p className="mt-3 text-xs text-slate-500">모델의 부위를 누르면 해당 보고서 목록으로 이동합니다.</p>
+          <p className="mt-3 text-xs leading-relaxed text-slate-500">보는 법: 부위 위의 숫자가 그 부위의 고장 보고서 수예요. 빨간색에 가까울수록 고장이 많고, 회색은 보고서가 없는 부위입니다. 모델의 부위나 위 목록을 누르면 해당 보고서로 이동합니다.</p>
         </div>
       </div>
     </div>

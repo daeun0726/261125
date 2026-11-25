@@ -23,6 +23,30 @@ function heatColor(t: number) {
   return t < 0.5 ? a.lerp(b, t * 2) : b.lerp(c, (t - 0.5) * 2);
 }
 
+function labelSprite(text: string, color: string) {
+  const c = document.createElement("canvas");
+  const ctx = c.getContext("2d")!;
+  const font = "700 44px Pretendard, 'Malgun Gothic', sans-serif";
+  ctx.font = font;
+  const w = Math.ceil(ctx.measureText(text).width) + 48;
+  c.width = w; c.height = 76;
+  ctx.font = font;
+  ctx.fillStyle = color;
+  const r = 30;
+  ctx.beginPath();
+  ctx.moveTo(r, 4); ctx.lineTo(w - r, 4); ctx.quadraticCurveTo(w - 4, 4, w - 4, 38); ctx.quadraticCurveTo(w - 4, 72, w - r, 72);
+  ctx.lineTo(r, 72); ctx.quadraticCurveTo(4, 72, 4, 38); ctx.quadraticCurveTo(4, 4, r, 4); ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 24, 40);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sp.scale.set((w / 76) * 0.55, 0.55, 1);
+  sp.renderOrder = 10;
+  return sp;
+}
+
 export default function Train3D({ vehicleType = "전기기관차", highlight = null, counts, onPick, height = 320, label }: Props) {
   const mount = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<string | null>(null);
@@ -163,6 +187,31 @@ export default function Train3D({ vehicleType = "전기기관차", highlight = n
         }
       });
     });
+    if (counts) {
+      // see-through body so every part is visible, then label each part that has reports
+      groups["차체"].children.forEach((m) => {
+        const mm = (m as THREE.Mesh).material as THREE.MeshStandardMaterial;
+        mm.transparent = true;
+        mm.opacity = (counts["차체"] || 0) > 0 ? 0.45 : 0.18;
+        mm.depthWrite = false;
+      });
+      const placed: THREE.Vector3[] = [];
+      DEVICE_LIST.forEach((d) => {
+        const n = counts[d] || 0;
+        if (!n) return;
+        const box = new THREE.Box3().setFromObject(groups[d]);
+        if (box.isEmpty() || box.min.y < -4) return;
+        const c = box.getCenter(new THREE.Vector3());
+        const pos = new THREE.Vector3(c.x, box.max.y + 0.55, c.z);
+        // nudge labels apart if they collide
+        while (placed.some((p) => p.distanceTo(pos) < 0.9)) pos.y += 0.7;
+        placed.push(pos.clone());
+        const col = "#" + heatColor(n / max).getHexString();
+        const sp = labelSprite(`${d} ${n}건`, n / max > 0.25 ? col : "#64748b");
+        sp.position.copy(pos);
+        scene.add(sp);
+      });
+    }
     if (highlight && internal.has(highlight)) {
       // see-through body so internal parts are visible
       groups["차체"].children.forEach((m) => {
